@@ -323,6 +323,10 @@
             annotatedObjectsTracker.getFrameWithObjects(frameNumber).then((frameWithObjects) => {
               ctx.drawImage(frameWithObjects.img, 0, 0);
 
+              // console.log(frameWithObjects);
+
+              renderGrayAllDOMAnnotatedObjects();
+
               for (let i = 0; i < frameWithObjects.objects.length; i++) {
                 let object = frameWithObjects.objects[i];
                 let annotatedObject = object.annotatedObject;
@@ -333,10 +337,58 @@
                   annotatedObject.dom.style.height = annotatedFrame.bbox.height + 'px';
                   annotatedObject.dom.style.left = annotatedFrame.bbox.x + 'px';
                   annotatedObject.dom.style.top = annotatedFrame.bbox.y + 'px';
+                  if (annotatedFrame.isGroundTruth == false)
+                    annotatedObject.dom.style.borderColor = 'blue';
+                  else
+                    annotatedObject.dom.style.borderColor = 'red';
                   annotatedObject.visible.prop('checked', true);
                 } else {
                   annotatedObject.dom.style.display = 'none';
                   annotatedObject.visible.prop('checked', false);
+                }
+              }
+
+              for (let i = 0; i < annotatedObjectsTracker.annotatedObjects.length; i++) {
+                let annotatedObject = annotatedObjectsTracker.annotatedObjects[i];
+                // console.log({'frameNumber': frameNumber, 'obj.frame': annotatedObject.get(frameNumber), 'obj': annotatedObject});
+
+                if (annotatedObject.get(frameNumber) == null) {
+                  if (annotatedObject.validFrames > 1) {
+
+                    let prevFrame = annotatedObject.frames[1];
+                    let nextFrame = annotatedObject.frames[annotatedObject.frames.length - 1];
+                    for (let j = 0; j < annotatedObject.frames.length; j++) {
+                      if (annotatedObject.frames[j].frameNumber < frameNumber &&
+                              annotatedObject.frames[j].frameNumber > prevFrame.frameNumber)
+                        prevFrame = annotatedObject.frames[j];
+                      if (annotatedObject.frames[j].frameNumber > frameNumber &&
+                              annotatedObject.frames[j].frameNumber < nextFrame.frameNumber)
+                        nextFrame = annotatedObject.frames[j];
+                    }
+
+                    // console.log({'prevFrame': prevFrame, 'nextFrame': nextFrame});
+
+
+                    if (nextFrame.frameNumber > frameNumber && prevFrame.frameNumber < frameNumber) {
+
+                      let bbox = new BoundingBox(0, 0, 0, 0);
+                      let nSteps = nextFrame.frameNumber - prevFrame.frameNumber;
+                      bbox.x = (prevFrame.bbox.x * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.x * (frameNumber - prevFrame.frameNumber)) / nSteps;
+                      bbox.y = (prevFrame.bbox.y * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.y * (frameNumber - prevFrame.frameNumber)) / nSteps;
+                      bbox.width = (prevFrame.bbox.width * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.width * (frameNumber - prevFrame.frameNumber)) / nSteps;
+                      bbox.height = (prevFrame.bbox.height * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.height * (frameNumber - prevFrame.frameNumber)) / nSteps;
+
+                      annotatedObject.dom.style.display = 'block';
+                      annotatedObject.dom.style.width = bbox.width + 'px';
+                      annotatedObject.dom.style.height = bbox.height + 'px';
+                      annotatedObject.dom.style.left = bbox.x + 'px';
+                      annotatedObject.dom.style.top = bbox.y + 'px';
+                      annotatedObject.dom.style.borderColor = 'yellow';
+                      annotatedObject.visible.prop('checked', true);
+
+                    }
+
+                  }
                 }
               }
 
@@ -380,6 +432,23 @@
         annotatedObject.controls.remove();
         $(annotatedObject.dom).remove();
         annotatedObjectsTracker.annotatedObjects.splice(i, 1);
+      }
+
+      function clearAllDOMAnnotatedObjects() {
+        for (let i = 0; i < annotatedObjectsTracker.annotatedObjects.length; i++) {
+          clearDOMAnnotatedObject(i);
+        }
+      }
+
+      function clearDOMAnnotatedObject(i) {
+        let annotatedObject = annotatedObjectsTracker.annotatedObjects[i];
+        annotatedObject.dom.style.display = 'none';
+      }
+
+      function renderGrayAllDOMAnnotatedObjects() {
+        for (let i = 0; i < annotatedObjectsTracker.annotatedObjects.length; i++) {
+          annotatedObjectsTracker.annotatedObjects[i].dom.style.borderColor = 'gray';
+        }
       }
 
       videoFile.addEventListener('change', extractionFileUploaded, false);
