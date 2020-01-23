@@ -320,63 +320,81 @@
 
         drawFrame: function(frameNumber) {
           return new Promise((resolve, _) => {
-              renderGrayAllDOMAnnotatedObjects();
-              for (let i = 0; i < annotatedObjectsTracker.annotatedObjects.length; i++) {
-                let annotatedObject = annotatedObjectsTracker.annotatedObjects[i];
-                if (annotatedObject.get(frameNumber) != null) {
-                    let annotatedFrame = annotatedObject.get(frameNumber);
-                    if (annotatedFrame.isVisible()) {
-                      annotatedObject.dom.style.display = 'block';
-                      annotatedObject.dom.style.width = annotatedFrame.bbox.width + 'px';
-                      annotatedObject.dom.style.height = annotatedFrame.bbox.height + 'px';
-                      annotatedObject.dom.style.left = annotatedFrame.bbox.x + 'px';
-                      annotatedObject.dom.style.top = annotatedFrame.bbox.y + 'px';
-                      if (annotatedFrame.isGroundTruth == false)  // TODO never used!
-                        annotatedObject.dom.style.borderColor = 'blue';
-                      else
-                        annotatedObject.dom.style.borderColor = 'red';
-                      annotatedObject.visible.prop('checked', true);
-                    } else {
-                      annotatedObject.dom.style.display = 'none';
-                      annotatedObject.visible.prop('checked', false);
-                    }
-                }
-                else{
-                    if (annotatedObject.frames.length > 1) {
+              annotatedObjectsTracker.getFrameWithObjects(frameNumber).then((frameWithObjects) => {
+                  ctx.drawImage(frameWithObjects.img, 0, 0);
+                  renderGrayAllDOMAnnotatedObjects();
+                  for (let i = 0; i < annotatedObjectsTracker.annotatedObjects.length; i++) {
+                      let annotatedObject = annotatedObjectsTracker.annotatedObjects[i];
+                      if (annotatedObject.get(frameNumber) != null) {
+                          let annotatedFrame = annotatedObject.get(frameNumber);
+                          if (annotatedFrame.isVisible()) {
+                              annotatedObject.dom.style.display = 'block';
+                              annotatedObject.dom.style.width = annotatedFrame.bbox.width + 'px';
+                              annotatedObject.dom.style.height = annotatedFrame.bbox.height + 'px';
+                              annotatedObject.dom.style.left = annotatedFrame.bbox.x + 'px';
+                              annotatedObject.dom.style.top = annotatedFrame.bbox.y + 'px';
+                              if (annotatedFrame.isGroundTruth == false)  // TODO never used!
+                                  annotatedObject.dom.style.borderColor = 'blue';
+                              else
+                                  annotatedObject.dom.style.borderColor = 'red';
+                              annotatedObject.visible.prop('checked', true);
+                          } else {
+                              annotatedObject.dom.style.display = 'none';
+                              annotatedObject.visible.prop('checked', false);
+                          }
+                      }
+                      else{
+                          if (annotatedObject.frames.length > 1) {
 
-                    let prevFrame = annotatedObject.frames[0];
-                    let nextFrame = annotatedObject.frames[annotatedObject.frames.length - 1];
-                    for (let j = 0; j < annotatedObject.frames.length; j++) {
-                      if (annotatedObject.frames[j].frameNumber < frameNumber &&
-                              annotatedObject.frames[j].frameNumber > prevFrame.frameNumber)
-                        prevFrame = annotatedObject.frames[j];
-                      if (annotatedObject.frames[j].frameNumber > frameNumber &&
-                              annotatedObject.frames[j].frameNumber < nextFrame.frameNumber)
-                        nextFrame = annotatedObject.frames[j];
-                    }
+                              let prevFrame = annotatedObject.frames[0];
+                              let nextFrame = annotatedObject.frames[annotatedObject.frames.length - 1];
+                              for (let j = 0; j < annotatedObject.frames.length; j++) {
+                                  if (annotatedObject.frames[j].frameNumber < frameNumber &&
+                                      annotatedObject.frames[j].frameNumber > prevFrame.frameNumber)
+                                      prevFrame = annotatedObject.frames[j];
+                                  if (annotatedObject.frames[j].frameNumber > frameNumber &&
+                                      annotatedObject.frames[j].frameNumber < nextFrame.frameNumber)
+                                      nextFrame = annotatedObject.frames[j];
+                              }
 
-                    if (nextFrame.frameNumber > frameNumber && prevFrame.frameNumber < frameNumber) {
+                              if (nextFrame.frameNumber > frameNumber && prevFrame.frameNumber < frameNumber) {
 
-                      let bbox = new BoundingBox(0, 0, 0, 0);
-                      let nSteps = nextFrame.frameNumber - prevFrame.frameNumber;
-                      bbox.x = (prevFrame.bbox.x * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.x * (frameNumber - prevFrame.frameNumber)) / nSteps;
-                      bbox.y = (prevFrame.bbox.y * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.y * (frameNumber - prevFrame.frameNumber)) / nSteps;
-                      bbox.width = (prevFrame.bbox.width * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.width * (frameNumber - prevFrame.frameNumber)) / nSteps;
-                      bbox.height = (prevFrame.bbox.height * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.height * (frameNumber - prevFrame.frameNumber)) / nSteps;
+                                  let bbox = new BoundingBox(0, 0, 0, 0);
+                                  let nSteps = nextFrame.frameNumber - prevFrame.frameNumber;
+                                  bbox.x = (prevFrame.bbox.x * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.x * (frameNumber - prevFrame.frameNumber)) / nSteps;
+                                  bbox.y = (prevFrame.bbox.y * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.y * (frameNumber - prevFrame.frameNumber)) / nSteps;
+                                  bbox.width = (prevFrame.bbox.width * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.width * (frameNumber - prevFrame.frameNumber)) / nSteps;
+                                  bbox.height = (prevFrame.bbox.height * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.height * (frameNumber - prevFrame.frameNumber)) / nSteps;
 
-                      annotatedObject.dom.style.display = 'block';
-                      annotatedObject.dom.style.width = bbox.width + 'px';
-                      annotatedObject.dom.style.height = bbox.height + 'px';
-                      annotatedObject.dom.style.left = bbox.x + 'px';
-                      annotatedObject.dom.style.top = bbox.y + 'px';
-                      annotatedObject.dom.style.borderColor = 'yellow';
-                      annotatedObject.visible.prop('checked', true);
+                                  annotatedObject.dom.style.display = 'block';
+                                  annotatedObject.dom.style.width = bbox.width + 'px';
+                                  annotatedObject.dom.style.height = bbox.height + 'px';
+                                  annotatedObject.dom.style.left = bbox.x + 'px';
+                                  annotatedObject.dom.style.top = bbox.y + 'px';
+                                  annotatedObject.dom.style.borderColor = 'yellow';
+                                  annotatedObject.visible.prop('checked', true);
 
-                    }
+                              }
 
                   }
                 }
               }
+
+              let shouldHideOthers = frameWithObjects.objects.some(o => o.annotatedObject.hideOthers);
+              if (shouldHideOthers) {
+                for (let i = 0; i < frameWithObjects.objects.length; i++) {
+                  let object = frameWithObjects.objects[i];
+                  let annotatedObject = object.annotatedObject;
+                  if (!annotatedObject.hideOthers) {
+                    annotatedObject.dom.style.display = 'none';
+                  }
+                }
+              }
+
+              slider.setPosition(this.currentFrame);
+
+              resolve();
+            });
           });
         },
 
