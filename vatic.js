@@ -191,7 +191,6 @@ class AnnotatedFrame {
 class AnnotatedObject {
   constructor() {
     this.frames = [];
-    this.validFrames = 0;
   }
 
   add(frame) {
@@ -202,16 +201,12 @@ class AnnotatedObject {
         return;
       } else if (this.frames[i].frameNumber > frame.frameNumber) {
         this.frames.splice(i, 0, frame);
-        this.validFrames += 1;
         this.removeFramesToBeRecomputedFrom(i + 1);
-        this.injectInvisibleFrameAtOrigin();
         return;
       }
     }
 
     this.frames.push(frame);
-    this.validFrames += 1;
-    this.injectInvisibleFrameAtOrigin();
   }
 
   get(frameNumber) {
@@ -242,11 +237,7 @@ class AnnotatedObject {
     }
   }
 
-  injectInvisibleFrameAtOrigin() {
-    if (this.frames.length == 0 || this.frames[0].frameNumber > 0) {
-      this.frames.splice(0, 0, new AnnotatedFrame(0, null, false));
-    }
-  }
+
 }
 
 /**
