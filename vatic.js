@@ -179,6 +179,7 @@ class AnnotatedFrame {
     this.bbox = bbox;
     this.isGroundTruth = isGroundTruth;
     this.visible = true;
+    this.behaviour = 'other';
   }
 
   isVisible() {
