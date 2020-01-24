@@ -178,10 +178,11 @@ class AnnotatedFrame {
     this.frameNumber = frameNumber;
     this.bbox = bbox;
     this.isGroundTruth = isGroundTruth;
+    this.visible = true;
   }
 
   isVisible() {
-    return this.bbox != null;
+    return this.visible;
   }
 }
 
@@ -191,6 +192,8 @@ class AnnotatedFrame {
 class AnnotatedObject {
   constructor() {
     this.frames = [];
+    this.name = null;
+    this.id = null;
   }
 
   add(frame) {
@@ -258,7 +261,7 @@ class AnnotatedObjectsTracker {
 
   getFrameWithObjects(frameNumber) {
     return new Promise((resolve, _) => {
-      let i = this.startFrame(frameNumber);
+      // let i = this.startFrame(frameNumber);
 
       this.framesManager.frames.getFrame(frameNumber).then((blob) => {
         blobToImage(blob).then((img) => {
@@ -289,25 +292,25 @@ class AnnotatedObjectsTracker {
     });
   }
 
-  startFrame(frameNumber) {
-    for (; frameNumber >= 0; frameNumber--) {
-      let allObjectsHaveData = true;
-
-      for (let i = 0; i < this.annotatedObjects.length; i++) {
-        let annotatedObject = this.annotatedObjects[i];
-        if (annotatedObject.get(frameNumber) == null) {
-          allObjectsHaveData = false;
-          break;
-        }
-      }
-
-      if (allObjectsHaveData) {
-        return frameNumber;
-      }
-    }
-
-    throw 'corrupted object annotations';
-  }
+  // startFrame(frameNumber) {
+  //   for (; frameNumber >= 0; frameNumber--) {
+  //     let allObjectsHaveData = true;
+  //
+  //     for (let i = 0; i < this.annotatedObjects.length; i++) {
+  //       let annotatedObject = this.annotatedObjects[i];
+  //       if (annotatedObject.get(frameNumber) == null) {
+  //         allObjectsHaveData = false;
+  //         break;
+  //       }
+  //     }
+  //
+  //     if (allObjectsHaveData) {
+  //       return frameNumber;
+  //     }
+  //   }
+  //
+  //   throw 'corrupted object annotations';
+  // }
 
   imageData(img) {
     let canvas = this.ctx.canvas;
