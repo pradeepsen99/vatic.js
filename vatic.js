@@ -174,12 +174,12 @@ class BoundingBox {
  * Represents a bounding box at a particular frame.
  */
 class AnnotatedFrame {
-  constructor(frameNumber, bbox, isGroundTruth) {
+  constructor(frameNumber, bbox, isGroundTruth, behaviour='other') {
     this.frameNumber = frameNumber;
     this.bbox = bbox;
     this.isGroundTruth = isGroundTruth;
     this.visible = true;
-    this.behaviour = 'other';
+    this.behaviour = behaviour;
   }
 
   isVisible() {

@@ -26,6 +26,10 @@
         border: 2px solid grey;
         position: absolute;
         z-index: 3;
+        color: white;
+        text-align: center;
+        font-size: 1.12em;
+        text-shadow: 0 0 3px black;
       }
 
       .object-controls {
@@ -251,7 +255,9 @@
       let framesManager = new FramesManager();
       let annotatedObjectsTracker = new AnnotatedObjectsTracker(framesManager);
 
-      let colors = ['yellow', 'red', 'lightgreen', 'cyan', 'orange', 'fuchsia', 'white', 'blue'];
+      // let colors = ['yellow', 'red', 'lightgreen', 'cyan', 'orange', 'fuchsia', 'white', 'blue'];
+      let colors = ['rgb(255,255,0)', 'rgb(255,0,0)', 'rgb(144,238,144)', 'rgb(0,255,255)', 'rgb(255,165,0)', 'rgb(255,0,255)', 'rgb(255,255,255)', 'rgb(0,0,255)'];
+      let colors_bg = ['rgba(255,255,0,0.1)', 'rgba(255,0,0,0.1)', 'rgba(144,238,144,0.1)', 'rgba(0,255,255,0.1)', 'rgba(255,165,0,0.1)', 'rgba(255,0,255,0.1)', 'rgba(255,255,255,0.1)', 'rgba(0,0,255,0.1)'];
 
       let slider = {
         init: function(min, max, onChange) {
@@ -317,7 +323,7 @@
             this.viewed = false;
             clearAllDOMAnnotatedObjects();
             $('#objects select').each(function() {this.value='other';});
-            $('#objects input.visible-flag').each(function() {this.prop('checked', true);});
+            $('#objects input.visible-flag').each(function(){this.prop('checked', true);});
           }
 
           this.isPlaying = true;
@@ -386,8 +392,9 @@
                               annotatedObject.dom.style.height = annotatedFrame.bbox.height + 'px';
                               annotatedObject.dom.style.left = annotatedFrame.bbox.x + 'px';
                               annotatedObject.dom.style.top = annotatedFrame.bbox.y + 'px';
-                              // annotatedObject.dom.style.borderColor = 'yellow';
+                              // annotatedObject.dom.style.color = colors[i % colors.length];
                               annotatedObject.dom.style.borderColor = colors[i % colors.length];
+                              annotatedObject.dom.style.backgroundColor = colors_bg[i % colors_bg.length];
                               annotatedObject.controls.css({'border-color': colors[i % colors.length]});
                               annotatedObject.dom.style.borderStyle = 'solid';
                               annotatedObject.visible.prop('checked', true);
@@ -425,8 +432,9 @@
                                   annotatedObject.dom.style.height = bbox.height + 'px';
                                   annotatedObject.dom.style.left = bbox.x + 'px';
                                   annotatedObject.dom.style.top = bbox.y + 'px';
-                                  // annotatedObject.dom.style.borderColor = 'yellow';
+                                  // annotatedObject.dom.style.color = colors[i % colors.length];
                                   annotatedObject.dom.style.borderColor = colors[i % colors.length];
+                                  annotatedObject.dom.style.backgroundColor = colors_bg[i % colors_bg.length];
                                   annotatedObject.controls.css({'border-color': colors[i % colors.length]});
                                   annotatedObject.dom.style.borderStyle = 'dotted';
                                   annotatedObject.visible.prop('checked', true);
@@ -435,6 +443,7 @@
                               }
                           }
                       }
+                      $(annotatedObject.dom).children(':eq(5)').text(annotatedObject.behaviour[0].value);
                   }
 
                   let shouldHideOthers = frameWithObjects.objects.some(o => o.annotatedObject.hideOthers);
@@ -613,7 +622,9 @@
       }
 
       function interactify(dom, onChange) {
+        // dom.style.color = colors[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors.length];
         dom.style.borderColor = colors[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors.length];
+        dom.style.backgroundColor = colors_bg[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors_bg.length];
         let bbox = $(dom);
         bbox.addClass('bbox');
 
@@ -646,6 +657,9 @@
             onChange(Math.round(position.left), Math.round(position.top), Math.round(bbox.width()), Math.round(bbox.height()));
           }
         });
+
+        let textDiv = document.createElement('div');
+        bbox.append(textDiv);
       }
 
       let mouse = {
@@ -682,6 +696,12 @@
         }
       };
 
+      // $(doodle).contextmenu(function(ev) {
+      //   ev.preventDefault();
+      //   // alert('success!');
+      //
+      // });
+
       doodle.onclick = function (e) {
         if (doodle.style.cursor != 'crosshair') {
           return;
@@ -699,11 +719,13 @@
             annotatedObject.dom,
             (x, y, width, height) => {
               let bbox = new BoundingBox(x, y, width, height);
-              annotatedObject.add(new AnnotatedFrame(player.currentFrame, bbox, true));
+              annotatedObject.add(new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.behaviour[0].value));
             }
           );
 
           addAnnotatedObjectControls(annotatedObject, annotatedObjectsTracker.annotatedObjects.length - 1);
+
+          $(annotatedObject.dom).children(':eq(5)').text(annotatedObject.behaviour[0].value);
 
           doodle.style.cursor = 'default';
         } else {
@@ -751,7 +773,7 @@
           let jquery = $(annotatedObject.dom);
           let position = jquery.position();
           bbox = new BoundingBox(Math.round(position.left), Math.round(position.top), Math.round(jquery.width()), Math.round(jquery.height()));
-          frame = new AnnotatedFrame(player.currentFrame, bbox, true);
+          frame = new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.behaviour[0].value);
           if (this.checked) {
             frame.visible = true;
           }
@@ -780,6 +802,8 @@
             '<option value="nose-to-nose">nose-to-nose</option>' +
             '<option value="nose-poke-elsewhere">nose-poke-elsewhere</option>' +
             '<option value="tail biting">tail biting</option>' +
+            '<option value="investigating">investigating</option>' +
+            '<option value="standing">standing</option>' +
             '<option value="other" selected="selected">other</option>' +
           '</select>'
         );
@@ -794,9 +818,9 @@
           let jquery = $(annotatedObject.dom);
           let position = jquery.position();
           bbox = new BoundingBox(Math.round(position.left), Math.round(position.top), Math.round(jquery.width()), Math.round(jquery.height()));
-          frame = new AnnotatedFrame(player.currentFrame, bbox, true);
-          frame.behaviour = this.value;
+          frame = new AnnotatedFrame(player.currentFrame, bbox, true, this.value);
           annotatedObject.add(frame);
+          jquery.children(':eq(5)').text(this.value);
         });
         behaviourLabel.append('Behaviour: ');
         behaviourLabel.append(behaviour);
@@ -821,7 +845,8 @@
 
         let div = $('<div class="object-controls"></div>');
         div.css({
-          'border-color': colors[colorIndex % colors.length]
+          'border-color': colors[colorIndex % colors.length],
+          'background-color': colors_bg[colorIndex % colors_bg.length]
         });
         // div.append(name);
         // div.append($('<br />'));
@@ -904,7 +929,7 @@
               annotatedObject.dom,
               (x, y, width, height) => {
                 let bbox = new BoundingBox(x, y, width, height);
-                annotatedObject.add(new AnnotatedFrame(player.currentFrame, bbox, true));
+                annotatedObject.add(new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.behaviour[0].value));
               }
             );
 
@@ -924,12 +949,12 @@
               let height = frame['bbox']['height'];
 
               // if (lastFrame + 1 != frameNumber) {
-              //   let annotatedFrame = new AnnotatedFrame(lastFrame + 1, null, true);
+              //   let annotatedFrame = new AnnotatedFrame(lastFrame + 1, null, true, behaviour);
               //   annotatedObject.add(annotatedFrame);
               // }
 
               let bbox = new BoundingBox(x, y, width, height);
-              let annotatedFrame = new AnnotatedFrame(frameNumber, bbox, isGroundTruth);
+              let annotatedFrame = new AnnotatedFrame(frameNumber, bbox, isGroundTruth, behaviour);
               annotatedFrame.visible = visible;
               annotatedFrame.behaviour = behaviour;
               annotatedObject.add(annotatedFrame);
@@ -938,7 +963,7 @@
             }
 
             // if (lastFrame + 1 < framesManager.frames.totalFrames()) {
-            //   let annotatedFrame = new AnnotatedFrame(lastFrame + 1, null, true);
+            //   let annotatedFrame = new AnnotatedFrame(lastFrame + 1, null, true, behaviour);
             //   annotatedObject.add(annotatedFrame);
             // }
           }
