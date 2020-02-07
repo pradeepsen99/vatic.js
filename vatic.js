@@ -16,111 +16,50 @@ class FramesManager {
   }
 }
 
-function blobToImage(blob) {
-  return new Promise((result, _) => {
-    let img = new Image();
-    img.onload = function() {
-      result(img);
-      URL.revokeObjectURL(this.src);
-    };
-    img.src = URL.createObjectURL(blob);
-  });
-}
-
 /**
  * Extracts the frame sequence of a video file.
  */
-function extractFramesFromVideo(config, file, progress) {
+function extractFramesFromVideo(video, canvas, config, file) {
   let resolve = null;
-  let db = null;
-  let video = document.createElement('video');
-  let canvas = document.createElement('canvas');
   let ctx = canvas.getContext('2d');
-  let dimensionsInitialized = false;
   let totalFrames = 0;
-  let processedFrames = 0;
-  let lastApproxFrame = -1;
-  let lastProgressFrame = -1;
-  let attachmentName = 'img' + config.imageExtension;
+  let duration = 0;
+  let totalSteps = 0;
 
   return new Promise((_resolve, _) => {
     resolve = _resolve;
 
-    let dbName = 'vatic_js';
-    db = new PouchDB(dbName).destroy().then(() => {
-      db = new PouchDB(dbName);
+    function onload() {
+      duration = video.duration;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-      video.autoplay = false;
-      video.muted = true;
-      video.loop = false;
-      video.playbackRate = config.playbackRate;
-      video.src = URL.createObjectURL(file);
-      compatibility.requestAnimationFrame(onBrowserAnimationFrame);
-      video.play();
-    });
-  });
+      // console.log(video.duration);
 
-  function onBrowserAnimationFrame() {
-    if (dimensionsInitialized && video.ended) {
-      if (processedFrames == totalFrames) {
-        videoEnded();
-      }
-      return;
-    }
+      video.addEventListener('seeked', function() {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      }, false);
 
-    compatibility.requestAnimationFrame(onBrowserAnimationFrame);
+      video.currentTime=0.0000001;
+      video.currentTime=0;
 
-    if (video.readyState !== video.HAVE_CURRENT_DATA &&
-        video.readyState !== video.HAVE_FUTURE_DATA &&
-        video.readyState !== video.HAVE_ENOUGH_DATA) {
-      return;
-    }
-
-    let currentApproxFrame = Math.round(video.currentTime * config.fps);
-    if (currentApproxFrame != lastApproxFrame) {
-      lastApproxFrame = currentApproxFrame;
-      let frameNumber = totalFrames;
-      totalFrames++;
-
-      if (!dimensionsInitialized) {
-        dimensionsInitialized = true;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-      }
-
-      ctx.drawImage(video, 0, 0);
-      canvas.toBlob(
-        (blob) => {
-          db.putAttachment(frameNumber.toString(), attachmentName, blob, config.imageMimeType).then((doc) => {
-            processedFrames++;
-
-            if (frameNumber > lastProgressFrame) {
-              lastProgressFrame = frameNumber;
-              progress(video.currentTime / video.duration, processedFrames, blob);
-            }
-
-            if (video.ended && processedFrames == totalFrames) {
-              videoEnded();
-            }
-          });
-        },
-        config.imageMimeType);
-    }
-  }
-
-  function videoEnded() {
-    if (video.src != '') {
-      URL.revokeObjectURL(video.src);
-      video.src = '';
+      totalSteps = duration / config.stepSize;  // show one frame each 0.1 seconds
 
       resolve({
-        totalFrames: () => { return totalFrames; },
+        width: video.videoWidth,
+        height: video.videoHeight,
+        totalFrames: () => { return Math.ceil(totalSteps); },
         getFrame: (frameNumber) => {
-          return db.getAttachment(frameNumber.toString(), attachmentName);
+          video.currentTime = frameNumber * config.stepSize;
+          return new Promise((resolve, _) => {resolve();});
         }
       });
     }
-  }
+
+    video.src = URL.createObjectURL(file);
+    video.addEventListener('loadeddata', onload, false);
+
+  });
 }
 
 /**
@@ -140,9 +79,12 @@ function extractFramesFromZip(config, file) {
           }
         }
 
+        // console.log(this);
+
         resolve({
           totalFrames: () => { return totalFrames; },
           getFrame: (frameNumber) => {
+            // console.log(this);
             return new Promise((resolve, _) => {
               let file = zip.file(frameNumber + config.imageExtension);
               file
@@ -174,11 +116,11 @@ class BoundingBox {
  * Represents a bounding box at a particular frame.
  */
 class AnnotatedFrame {
-  constructor(frameNumber, bbox, isGroundTruth, behaviour='other') {
+  constructor(frameNumber, bbox, isGroundTruth, visible=true, behaviour='other') {
     this.frameNumber = frameNumber;
     this.bbox = bbox;
     this.isGroundTruth = isGroundTruth;
-    this.visible = true;
+    this.visible = visible;
     this.behaviour = behaviour;
   }
 
@@ -264,8 +206,7 @@ class AnnotatedObjectsTracker {
     return new Promise((resolve, _) => {
       // let i = this.startFrame(frameNumber);
 
-      this.framesManager.frames.getFrame(frameNumber).then((blob) => {
-        blobToImage(blob).then((img) => {
+      this.framesManager.frames.getFrame(frameNumber).then(() => {
           let result = [];
           // let toCompute = [];
           for (let i = 0; i < this.annotatedObjects.length; i++) {
@@ -286,8 +227,7 @@ class AnnotatedObjectsTracker {
           // console.log(this.annotatedObjects);
           // console.log(result);
 
-          resolve({img: img, objects: result});
-        });
+          resolve({img: null, objects: result});
       });
 
     });
