@@ -225,7 +225,7 @@
       window.onbeforeunload = beforeunload;
 
       let config = {
-        stepSize: 0.001,
+        stepSize: 0.1,
 
         // Format of the extracted frames
         imageMimeType: 'image/jpeg',
@@ -431,6 +431,8 @@
                                       annotatedObject.frames[j].frameNumber < nextFrame.frameNumber)
                                       nextFrame = annotatedObject.frames[j];
                               }
+
+                              console.log(frameNumber, annotatedObject, prevFrame, nextFrame);
 
                               if (nextFrame.frameNumber > frameNumber && prevFrame.frameNumber < frameNumber && prevFrame.visible === true) {
                                   let bbox = new BoundingBox(0, 0, 0, 0);
@@ -718,7 +720,7 @@
             annotatedObject.dom,
             (x, y, width, height) => {
               let bbox = new BoundingBox(x, y, width, height);
-              annotatedObject.add(new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.visible, annotatedObject.behaviour[0].value));
+              annotatedObject.add(new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.visible.prop('checked'), annotatedObject.behaviour[0].value));
             }
           );
 
@@ -931,7 +933,7 @@
               annotatedObject.dom,
               (x, y, width, height) => {
                 let bbox = new BoundingBox(x, y, width, height);
-                annotatedObject.add(new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.visible, annotatedObject.behaviour[0].value));
+                annotatedObject.add(new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.visible.prop('checked'), annotatedObject.behaviour[0].value));
               }
             );
 
