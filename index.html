@@ -187,8 +187,8 @@
             <li><div class="bbox bbox-legend" style="border-color: red; border-style: dashed"></div> Last annotated position</li>
           </ul>
         </p>
-        <!--video id="video"></video-->
         <div id="doodle">
+          <video id="video" style="position: absolute; z-index: -1;"></video>
           <canvas id="canvas"></canvas>
         </div>
         <p style="margin: 0.6em 0 0.4em;">
@@ -226,6 +226,7 @@
 
       let config = {
         stepSize: 0.1,
+        playbackRate: 0.4,
 
         // Format of the extracted frames
         imageMimeType: 'image/jpeg',
@@ -236,8 +237,8 @@
       };
 
       let doodle = document.querySelector('#doodle');
-      // let video = document.querySelector('#video');
-      let video = document.createElement('video');
+      let video = document.querySelector('#video');
+      // let video = document.createElement('video');
       let canvas = document.querySelector('#canvas');
       let ctx = canvas.getContext('2d');
       let videoFile = document.querySelector('#videoFile');
@@ -281,9 +282,10 @@
       slider.reset();
 
       video.addEventListener('timeupdate', function (event) {
-        if (player.isPlaying === true) {
+        // if (player.isPlaying === true) {
           player.nextFrame();
-        }
+        // }
+        // canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
       });
 
       let player = {
@@ -316,8 +318,12 @@
           }
 
           this.pause();
+          this.pause();  // runned multiple times to be "sure" that the video is paused
+          this.pause();  // runned multiple times to be "sure" that the video is paused
+          this.pause();  // runned multiple times to be "sure" that the video is paused
 
           if (frameNumber >= 0 && frameNumber < framesManager.frames.totalFrames()) {
+            framesManager.frames.seekVideoAndGetFrame(frameNumber);
             this.drawFrame(frameNumber);
             this.currentFrame = frameNumber;
             currentFrameElement.innerHTML = '' + this.currentFrame;
@@ -336,7 +342,7 @@
             clearAllDOMAnnotatedObjects();
             $('#objects select').each(function() {this.value='other';});
             $('#objects input.visible-flag').each(function(){$(this).prop('checked', true);});
-            framesManager.frames.getFrame(0);
+            framesManager.frames.seekVideoAndGetFrame(0);
           }
 
           this.isPlaying = true;
@@ -346,7 +352,8 @@
           pauseButton.disabled = false;
           pauseButton.style.display = 'inline-block';
 
-          this.nextFrame();
+          // this.nextFrame();
+          video.play();
         },
 
         pause: function() {
@@ -354,11 +361,9 @@
             return;
           }
 
+          video.pause();
+
           this.isPlaying = false;
-          if (this.timeout != null) {
-            clearTimeout(this.timeout);
-            this.timeout = null;
-          }
 
           pauseButton.disabled = true;
           pauseButton.style.display = 'none';
@@ -384,10 +389,14 @@
             return;
           }
 
-          this.drawFrame(this.currentFrame + 1).then(() => {
-            this.currentFrame++;
+          // let nextFrameNumber = this.currentFrame + 1;
+          let nextFrameNumber = Math.round(video.currentTime / config.stepSize);
+          // console.log('\n\n'+nextFrameNumber+'\n\n');
+
+          this.drawFrame(nextFrameNumber).then(() => {
+            // this.currentFrame++;
+            this.currentFrame = nextFrameNumber;
             currentFrameElement.innerHTML = '' + this.currentFrame;
-            // this.timeout = setTimeout(() => this.nextFrame(), 1000 / (config.fps * parseFloat(speedInput.value)));
           });
         },
 
@@ -432,7 +441,8 @@
                                       nextFrame = annotatedObject.frames[j];
                               }
 
-                              console.log(frameNumber, annotatedObject, prevFrame, nextFrame);
+                              if (config.consoleLog === true)
+                                console.log(frameNumber, annotatedObject, prevFrame, nextFrame);
 
                               if (nextFrame.frameNumber > frameNumber && prevFrame.frameNumber < frameNumber && prevFrame.visible === true) {
                                   let bbox = new BoundingBox(0, 0, 0, 0);
@@ -598,7 +608,8 @@
           if (frames.totalFrames() > 0) {
             videoDimensionsElement.innerHTML = 'Video dimensions determined: ' + frames.width + 'x' + frames.height;
             initializeCanvasDimensions(frames.width, frames.height);
-            frames.getFrame(0).then(() => {
+            // frames.getFrame(0).then(() => {
+            frames.seekVideoAndGetFrame(0).then(() => {
 
                 framesManager.set(frames);
                 slider.init(
@@ -819,7 +830,7 @@
           let jquery = $(annotatedObject.dom);
           let position = jquery.position();
           bbox = new BoundingBox(Math.round(position.left), Math.round(position.top), Math.round(jquery.width()), Math.round(jquery.height()));
-          frame = new AnnotatedFrame(player.currentFrame, bbox, true, annotatedFrame.visible, this.value);
+          frame = new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.visible.prop('checked'), this.value);
           annotatedObject.add(frame);
           jquery.children(':eq(5)').text(this.value);
         });

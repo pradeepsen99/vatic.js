@@ -36,20 +36,25 @@ function extractFramesFromVideo(video, canvas, config, file) {
 
       // console.log(video.duration);
 
-      video.addEventListener('seeked', function() {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      }, false);
+      // video.addEventListener('seeked', function() {
+      //     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // }, false);
 
       video.currentTime=0.0000001;
       video.currentTime=0;
 
       totalSteps = duration / config.stepSize;  // show one frame each 0.1 seconds
 
+      video.playbackRate = config.playbackRate;
+
       resolve({
         width: video.videoWidth,
         height: video.videoHeight,
         totalFrames: () => { return Math.ceil(totalSteps); },
         getFrame: (frameNumber) => {
+          return new Promise((resolve, _) => {resolve();});
+        },
+        seekVideoAndGetFrame: (frameNumber) => {
           video.currentTime = frameNumber * config.stepSize;
           return new Promise((resolve, _) => {resolve();});
         }
