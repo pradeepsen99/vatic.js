@@ -200,7 +200,7 @@
         <div id="objects"></div>
       </li>
       <li>
-        <p><input type="button" id="generateJson" value="Generate" disabled="disabled" /> the JSON annotations file.</p>
+        <p><a href="#" download="output.json" id="generateJson"><input type="button" id="generateButton" value="Generate" disabled="disabled" /></a> the JSON annotations file.</p>
       </li>
     </ol>
 
@@ -208,7 +208,7 @@
 
     <script type="text/javascript" src="dist/compatibility.js"></script>
     <script type="text/javascript" src="dist/jszip.js"></script>
-    <script type="text/javascript" src="dist/StreamSaver.js"></script>
+    <!-- script type="text/javascript" src="dist/StreamSaver.js"></script-->
     <script type="text/javascript" src="dist/polyfill.js"></script>
     <script type="text/javascript" src="dist/jsfeat.js"></script>
     <script type="text/javascript" src="dist/nudged.js"></script>
@@ -254,7 +254,8 @@
       let pauseButton = document.querySelector('#pause');
       let speedInput = document.querySelector('#speed');
       let sliderElement = document.querySelector('#slider');
-      let generateJsonButton = document.querySelector('#generateJson');
+      let generateJsonLink = document.querySelector('#generateJson');
+      let generateJsonButton = document.querySelector('#generateButton');
 
       let framesManager = new FramesManager();
       let annotatedObjectsTracker = new AnnotatedObjectsTracker(framesManager);
@@ -538,7 +539,7 @@
       playButton.addEventListener('click', playClicked, false);
       pauseButton.addEventListener('click', pauseClicked, false);
       downloadFramesButton.addEventListener('click', downloadFrames, false);
-      generateJsonButton.addEventListener('click', generateJson, false);
+      generateJsonLink.addEventListener('click', generateJson, false);
 
       function playClicked() {
         player.play();
@@ -550,6 +551,9 @@
 
       function downloadFrames() {
         let zip = new JSZip();
+
+        alert('Not implemented.');
+        return;
 
         let processed = 0;
         let totalFrames = framesManager.frames.totalFrames();
@@ -894,12 +898,7 @@
         };
 
         let outputStr = JSON.stringify(output);
-
-        window.onbeforeunload = null;
-        let writeStream = streamSaver.createWriteStream('output.json').getWriter();
-        let encoder = new TextEncoder();
-        writeStream.write(encoder.encode(outputStr));
-        writeStream.close().then(() => { window.onbeforeunload = beforeunload; });
+        this.href = 'data:plain/text,' + outputStr;
       }
 
       function importJson() {
