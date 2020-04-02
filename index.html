@@ -30,7 +30,14 @@
         text-align: center;
         font-size: 1.12em;
         text-shadow: 0 0 3px black;
+        /*transition: box-shadow 1s;*/
       }
+
+      /* this works only on Chrome */
+      /*.bbox:active {
+        box-shadow: 0px 0px 10px 5px white;
+        transition: box-shadow 0.3s;
+      }*/
 
       .object-controls {
         border: 2px solid grey;
@@ -262,7 +269,9 @@
 
       // let colors = ['yellow', 'red', 'lightgreen', 'cyan', 'orange', 'fuchsia', 'white', 'blue'];
       let colors = ['rgb(255,255,0)', 'rgb(255,0,0)', 'rgb(144,238,144)', 'rgb(0,255,255)', 'rgb(255,165,0)', 'rgb(255,0,255)', 'rgb(255,255,255)', 'rgb(0,0,255)'];
-      let colors_bg = ['rgba(255,255,0,0.1)', 'rgba(255,0,0,0.1)', 'rgba(144,238,144,0.1)', 'rgba(0,255,255,0.1)', 'rgba(255,165,0,0.1)', 'rgba(255,0,255,0.1)', 'rgba(255,255,255,0.1)', 'rgba(0,0,255,0.1)'];
+      let colors_bg = ['rgba(255,255,0,0.2)', 'rgba(255,0,0,0.2)', 'rgba(144,238,144,0.2)', 'rgba(0,255,255,0.2)', 'rgba(255,165,0,0.2)', 'rgba(255,0,255,0.2)', 'rgba(255,255,255,0.2)', 'rgba(0,0,255,0.2)'];
+      let colors_hl = ['rgba(255,255,0,0.5)', 'rgba(255,0,0,0.5)', 'rgba(144,238,144,0.5)', 'rgba(0,255,255,0.5)', 'rgba(255,165,0,0.5)', 'rgba(255,0,255,0.5)', 'rgba(255,255,255,0.5)', 'rgba(0,0,255,0.5)'];
+      let currentZindex = 1;
 
       let slider = {
         init: function(min, max, onChange) {
@@ -641,23 +650,31 @@
         // dom.style.color = colors[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors.length];
         dom.style.borderColor = colors[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors.length];
         dom.style.backgroundColor = colors_bg[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors_bg.length];
+        dom.onclick = () => {
+          dom.style.zIndex = ++currentZindex;
+          // console.log(dom.style.zIndex);
+        };
+        // console.log(dom.style.zIndex);
         let bbox = $(dom);
         bbox.addClass('bbox');
 
-        let createHandleDiv = (className) => {
+        let createHandleDiv = (className, color='rgba(255, 0, 0, .5)') => {
           let handle = document.createElement('div');
           handle.className = className;
+          handle.style.borderColor = color;
           bbox.append(handle);
           return handle;
         };
 
+        let handleColor = colors_hl[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors_hl.length];
+
         bbox.resizable({
           containment: 'parent',
           handles: {
-            n: createHandleDiv('ui-resizable-handle ui-resizable-n'),
-            s: createHandleDiv('ui-resizable-handle ui-resizable-s'),
-            e: createHandleDiv('ui-resizable-handle ui-resizable-e'),
-            w: createHandleDiv('ui-resizable-handle ui-resizable-w')
+            n: createHandleDiv('ui-resizable-handle ui-resizable-n', handleColor),
+            s: createHandleDiv('ui-resizable-handle ui-resizable-s', handleColor),
+            e: createHandleDiv('ui-resizable-handle ui-resizable-e', handleColor),
+            w: createHandleDiv('ui-resizable-handle ui-resizable-w', handleColor)
           },
           stop: (e, ui) => {
             let position = bbox.position();
@@ -667,7 +684,7 @@
 
         bbox.draggable({
           containment: 'parent',
-          handle: createHandleDiv('handle center-drag'),
+          handle: createHandleDiv('handle center-drag', handleColor),
           stop: (e, ui) => {
             let position = bbox.position();
             onChange(Math.round(position.left), Math.round(position.top), Math.round(bbox.width()), Math.round(bbox.height()));
@@ -752,6 +769,8 @@
           dom.style.left = mouse.x + 'px';
           dom.style.top = mouse.y + 'px';
           tmpAnnotatedObject = { dom: dom };
+          tmpAnnotatedObject.dom.style.zIndex = ++currentZindex;
+          // console.log(tmpAnnotatedObject.dom.style.zIndex);
         }
       };
 
