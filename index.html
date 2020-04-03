@@ -23,14 +23,21 @@
       }
 
       .bbox {
-        border: 2px solid grey;
+        /*border: 2px solid grey;*/
+        border: 1px solid grey;
+        box-sizing: border-box;
         position: absolute;
         z-index: 3;
         color: white;
         text-align: center;
-        font-size: 1.12em;
+        /*font-size: 1.12em;*/
         text-shadow: 0 0 3px black;
         /*transition: box-shadow 1s;*/
+        opacity: 0.4;
+        font-size: 0;
+      }
+      .bbox > div {
+        display: none;
       }
 
       /* this works only on Chrome */
@@ -38,6 +45,14 @@
         box-shadow: 0px 0px 10px 5px white;
         transition: box-shadow 0.3s;
       }*/
+      .bbox.active {
+        opacity: 1;
+        font-size: 1.12em;
+        border-width: 2px;
+      }
+      .bbox.active > div {
+        display: inherit;
+      }
 
       .object-controls {
         border: 2px solid grey;
@@ -47,14 +62,16 @@
         box-shadow: 0 0 2px 0;
       }
 
-      .bbox-legend {
+      div.bbox.bbox-legend, div.bbox.bbox-legend:not(active) {
         position: relative!important;
-        display: inline-block;
-        width: 12px;
-        height: 12px;
+        display: inline-block!important;
+        width: 16px;
+        height: 16px;
         margin-bottom: 7px;
         margin-right: 3px;
         vertical-align: text-top;
+        border-width: 2px!important;
+        opacity: 1!important;
       }
 
       p {
@@ -107,6 +124,7 @@
         position: relative;
         text-align: left;
         height: .8em;
+        margin: 12px 0 8px;
       }
 
       .ui-slider-handle {
@@ -179,19 +197,23 @@
       </li>
       <li>
         <p>Manually annotate the frame sequence:</p>
-        <p>To create a new bounding box, first click "<span style="font-weight: bold;">+</span>" then left click on two locations in the video corresponding to the corners of the box ("Esc" to undo).</p>
+        <p>To create a new bounding box, first press "<span style="font-weight: bold;">+</span>" then left click on two locations in the video corresponding to the corners of the box ("Esc" to undo).</p>
         <p>Tips:
           <ul>
             <li>Use the spacebar to play/pause the video, and the left and right arrows to navigate frame by frame.</li>
-            <li>The visibility of each object can be toogled with its visiblity checkbox under the video.</li>
+            <li>The visibility of each object can be toogled with its visiblity checkbox under the video. [Affects annotations]</li>
+            <li><span style="color: red; font-weight: bold;">NEW</span> Click on a bounding box to activate it. Non-active bounding boxes are now grayish.</li>
+            <li><span style="color: red; font-weight: bold;">NEW</span> The active bounding box is shown on top of the others.</li>
+            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>h</strong>" to hide/show all bounding boxes except the active one. [Doesn't affect annotations]</li>
+            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>d</strong>" to enable/disable the dark mode.</li>
             <li>Zoom in with your browser to place the bounding boxes more accurately.</li>
           </ul>
         <p>Legend:
           <ul>
-            <li><div class="bbox bbox-legend" style=""></div> Inactive bounding box</li>
-            <li><div class="bbox bbox-legend" style="border-color: red;"></div> Annotated bounding box</li>
-            <li><div class="bbox bbox-legend" style="border-color: red; border-style: dotted"></div> Interpolated bounding box</li>
-            <li><div class="bbox bbox-legend" style="border-color: red; border-style: dashed"></div> Last annotated position</li>
+            <li><div class="bbox bbox-legend active" style=""></div> Inactive bounding box</li>
+            <li><div class="bbox bbox-legend active" style="border-color: red;"></div> Annotated bounding box</li>
+            <li><div class="bbox bbox-legend active" style="border-color: red; border-style: dotted"></div> Interpolated bounding box</li>
+            <li><div class="bbox bbox-legend active" style="border-color: red; border-style: dashed"></div> Last annotated position</li>
           </ul>
         </p>
         <div id="doodle">
@@ -272,6 +294,8 @@
       let colors_bg = ['rgba(255,255,0,0.2)', 'rgba(255,0,0,0.2)', 'rgba(144,238,144,0.2)', 'rgba(0,255,255,0.2)', 'rgba(255,165,0,0.2)', 'rgba(255,0,255,0.2)', 'rgba(255,255,255,0.2)', 'rgba(0,0,255,0.2)'];
       let colors_hl = ['rgba(255,255,0,0.5)', 'rgba(255,0,0,0.5)', 'rgba(144,238,144,0.5)', 'rgba(0,255,255,0.5)', 'rgba(255,165,0,0.5)', 'rgba(255,0,255,0.5)', 'rgba(255,255,255,0.5)', 'rgba(0,0,255,0.5)'];
       let currentZindex = 1;
+      let currentVisibility = true;
+      let darkMode = false;
 
       let slider = {
         init: function(min, max, onChange) {
@@ -320,6 +344,7 @@
           this.isReady = true;
 
           playButton.disabled = false;
+          fullVideoFilePath.focus();
         },
 
         seek: function(frameNumber) {
@@ -328,6 +353,7 @@
           }
 
           this.pause();
+          this.pause();  // runned multiple times to be "sure" that the video is paused
           this.pause();  // runned multiple times to be "sure" that the video is paused
           this.pause();  // runned multiple times to be "sure" that the video is paused
           this.pause();  // runned multiple times to be "sure" that the video is paused
@@ -413,7 +439,7 @@
         drawFrame: function(frameNumber) {
           return new Promise((resolve, _) => {
               annotatedObjectsTracker.getFrameWithObjects(frameNumber).then((frameWithObjects) => {
-                  renderDashedAllDOMAnnotatedObjects();
+                  // renderDashedAllDOMAnnotatedObjects();
                   for (let i = 0; i < annotatedObjectsTracker.annotatedObjects.length; i++) {
                       let annotatedObject = annotatedObjectsTracker.annotatedObjects[i];
                       if (annotatedObject.get(frameNumber) != null) {
@@ -438,8 +464,38 @@
                           annotatedObject.behaviour[0].value = annotatedFrame.behaviour;
                       }
                       else {
-                          if (annotatedObject.frames.length > 1) {
+                          if (annotatedObject.frames[0].frameNumber > frameNumber) {
+                              // console.log('removing...');
+                              // must not exist (still not annotated)
+                              clearDOMAnnotatedObject(i);
+                          }
+                          else if (annotatedObject.frames.length === 1) {
+                              // console.log('dashing...');
+                              // must be dashed
+                              let annotatedFrame = annotatedObject.get(annotatedObject.frames[0].frameNumber);
+                              annotatedObject.dom.style.width = annotatedFrame.bbox.width + 'px';
+                              annotatedObject.dom.style.height = annotatedFrame.bbox.height + 'px';
+                              annotatedObject.dom.style.left = annotatedFrame.bbox.x + 'px';
+                              annotatedObject.dom.style.top = annotatedFrame.bbox.y + 'px';
+                              // annotatedObject.dom.style.color = colors[i % colors.length];
+                              annotatedObject.dom.style.borderColor = colors[i % colors.length];
+                              annotatedObject.dom.style.backgroundColor = colors_bg[i % colors_bg.length];
+                              annotatedObject.controls.css({'border-color': colors[i % colors.length]});
+                              annotatedObject.dom.style.borderStyle = 'dashed';
+                              if (annotatedFrame.isVisible()) {
+                                  annotatedObject.dom.style.display = 'block';
+                                  annotatedObject.visible.prop('checked', true);
+                              } else {
+                                  annotatedObject.dom.style.display = 'none';
+                                  annotatedObject.visible.prop('checked', false);
+                              }
 
+                              annotatedObject.behaviour[0].value = annotatedFrame.behaviour;
+                          }
+
+                          else if (annotatedObject.frames.length > 1) {
+                              // interpolation
+                              //console.log('interpolation...');
                               let prevFrame = annotatedObject.frames[0];
                               let nextFrame = annotatedObject.frames[annotatedObject.frames.length - 1];
                               for (let j = 0; j < annotatedObject.frames.length; j++) {
@@ -455,6 +511,7 @@
                                 console.log(frameNumber, annotatedObject, prevFrame, nextFrame);
 
                               if (nextFrame.frameNumber > frameNumber && prevFrame.frameNumber < frameNumber && prevFrame.visible === true) {
+                                  // interpolation
                                   let bbox = new BoundingBox(0, 0, 0, 0);
                                   let nSteps = nextFrame.frameNumber - prevFrame.frameNumber;
                                   bbox.x = (prevFrame.bbox.x * (nextFrame.frameNumber - frameNumber) + nextFrame.bbox.x * (frameNumber - prevFrame.frameNumber)) / nSteps;
@@ -473,6 +530,28 @@
                                   annotatedObject.controls.css({'border-color': colors[i % colors.length]});
                                   annotatedObject.dom.style.borderStyle = 'dotted';
                                   annotatedObject.visible.prop('checked', true);
+
+                                  annotatedObject.behaviour[0].value = prevFrame.behaviour;
+                              }
+                              else if (prevFrame.frameNumber < frameNumber && prevFrame.frameNumber === nextFrame.frameNumber) {
+                                  // there are not future frames. Using the last annotated frame
+                                  annotatedObject.dom.style.display = 'block';
+                                  annotatedObject.dom.style.width = prevFrame.bbox.width + 'px';
+                                  annotatedObject.dom.style.height = prevFrame.bbox.height + 'px';
+                                  annotatedObject.dom.style.left = prevFrame.bbox.x + 'px';
+                                  annotatedObject.dom.style.top = prevFrame.bbox.y + 'px';
+                                  // annotatedObject.dom.style.color = colors[i % colors.length];
+                                  annotatedObject.dom.style.borderColor = colors[i % colors.length];
+                                  annotatedObject.dom.style.backgroundColor = colors_bg[i % colors_bg.length];
+                                  annotatedObject.controls.css({'border-color': colors[i % colors.length]});
+                                  annotatedObject.dom.style.borderStyle = 'dotted';
+                                  if (prevFrame.isVisible()) {
+                                      annotatedObject.dom.style.display = 'block';
+                                      annotatedObject.visible.prop('checked', true);
+                                  } else {
+                                      annotatedObject.dom.style.display = 'none';
+                                      annotatedObject.visible.prop('checked', false);
+                                  }
 
                                   annotatedObject.behaviour[0].value = prevFrame.behaviour;
                               }
@@ -534,6 +613,7 @@
       function clearDOMAnnotatedObject(i) {
         let annotatedObject = annotatedObjectsTracker.annotatedObjects[i];
         annotatedObject.dom.style.display = 'none';
+        annotatedObject.visible.prop('checked', false);
       }
 
       function renderDashedAllDOMAnnotatedObjects() {
@@ -646,6 +726,10 @@
         });
       }
 
+      function removeActiveClass() {
+        $('.bbox.active').removeClass('active');
+      }
+
       function interactify(dom, onChange) {
         // dom.style.color = colors[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors.length];
         dom.style.borderColor = colors[(annotatedObjectsTracker.annotatedObjects.length - 1) % colors.length];
@@ -653,6 +737,8 @@
         dom.onclick = () => {
           dom.style.zIndex = ++currentZindex;
           // console.log(dom.style.zIndex);
+          removeActiveClass();
+          $(dom).addClass('active')
         };
         // console.log(dom.style.zIndex);
         let bbox = $(dom);
@@ -775,8 +861,9 @@
       };
 
       function newBboxElement() {
+          removeActiveClass();
           let dom = document.createElement('div');
-          dom.className = 'bbox';
+          dom.className = 'bbox active';
           doodle.appendChild(dom);
           return dom;
       }
@@ -1007,8 +1094,39 @@
         if (e.key === " ") { // space
           player.toogle();
         }
-        else if (e.key === "+") { // n
+        else if (e.key === "+") { // +
           doodle.style.cursor = 'crosshair';
+        }
+        else if (e.key === "d") { // d
+          if (darkMode === false) {
+            var sheet_dm = document.createElement('style');
+            sheet_dm.id = 'darkModeStylesheet';
+            sheet_dm.innerHTML = "html, body {background-color: #282828; color: #eee;}";
+            document.body.appendChild(sheet_dm);
+            darkMode = true;
+          }
+          else {
+            var sheet_dm_ToBeRemoved = document.getElementById('darkModeStylesheet');
+            var sheet_dm_Parent = sheet_dm_ToBeRemoved.parentNode;
+            sheet_dm_Parent.removeChild(sheet_dm_ToBeRemoved);
+            darkMode = false;
+          }
+        }
+        else if (e.key === "h") { // h
+          if (currentVisibility === true) {
+            var sheet = document.createElement('style');
+            sheet.id = 'hideBBoxStylesheet';
+            sheet.innerHTML = ".bbox:not(.active), .bbox:not(.active) > div {display: none!important;}\n" +
+                    "#doodle video {box-shadow: 0 0 0px 5px #8f1b1b;}";
+            document.body.appendChild(sheet);
+            currentVisibility = false;
+          }
+          else {
+            var sheetToBeRemoved = document.getElementById('hideBBoxStylesheet');
+            var sheetParent = sheetToBeRemoved.parentNode;
+            sheetParent.removeChild(sheetToBeRemoved);
+            currentVisibility = true;
+          }
         }
         else if (e.key === "Escape") { // escape
           if (tmpAnnotatedObject != null) {
