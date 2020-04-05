@@ -175,6 +175,27 @@ class AnnotatedObject {
     return null;
   }
 
+  getPrev(frameNumber) {
+    for (let i = this.frames.length - 1; i >= 0; i--) {
+      let currentFrame = this.frames[i];
+      if (currentFrame.frameNumber < frameNumber) {
+        return currentFrame;
+      }
+    }
+    return null;
+  }
+
+  getNext(frameNumber) {
+    for (let i = 0; i < this.frames.length; i++) {
+      let currentFrame = this.frames[i];
+      if (currentFrame.frameNumber > frameNumber) {
+        return currentFrame;
+      }
+    }
+
+    return null;
+  }
+
   removeFramesToBeRecomputedFrom(frameNumber) {
     let count = 0;
     for (let i = frameNumber; i < this.frames.length; i++) {
