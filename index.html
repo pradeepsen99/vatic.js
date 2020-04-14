@@ -848,6 +848,8 @@
         let output = {
           "videoFileName": videoFileName,
           "fullVideoFilePath": fullVideoFilePath.value,
+          "stepSize": config['stepSize'],
+          "config": config,
           "objects": objects
         };
 
@@ -954,7 +956,11 @@
         if (config.consoleLog === true)
           console.log(e);
 
-        if (e.key === " ") { // space
+
+        if ($("#videoFilePath").is(':focus')) {
+          preventDefault = false;
+        }
+        else if (e.key === " ") { // space
           player.toogle();
         }
         else if (e.key === "+") { // +
