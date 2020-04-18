@@ -136,7 +136,7 @@
       // let colors = ['yellow', 'red', 'lightgreen', 'cyan', 'orange', 'fuchsia', 'white', 'blue'];
       let colors = ['rgb(255,255,0)', 'rgb(255,0,0)', 'rgb(144,238,144)', 'rgb(0,255,255)', 'rgb(255,165,0)', 'rgb(255,0,255)', 'rgb(255,255,255)', 'rgb(0,0,255)'];
       let colors_bg = ['rgba(255,255,0,0.2)', 'rgba(255,0,0,0.2)', 'rgba(144,238,144,0.2)', 'rgba(0,255,255,0.2)', 'rgba(255,165,0,0.2)', 'rgba(255,0,255,0.2)', 'rgba(255,255,255,0.2)', 'rgba(0,0,255,0.2)'];
-      let colors_hl = ['rgba(255,255,0,0.5)', 'rgba(255,0,0,0.5)', 'rgba(144,238,144,0.5)', 'rgba(0,255,255,0.5)', 'rgba(255,165,0,0.5)', 'rgba(255,0,255,0.5)', 'rgba(255,255,255,0.5)', 'rgba(0,0,255,0.5)'];
+      let colors_hl = ['rgba(255,255,0,0.75)', 'rgba(255,0,0,0.75)', 'rgba(144,238,144,0.75)', 'rgba(0,255,255,0.75)', 'rgba(255,165,0,0.75)', 'rgba(255,0,255,0.75)', 'rgba(255,255,255,0.75)', 'rgba(0,0,255,0.75)'];
       let currentZindex = 1;
       let currentVisibility = true;
       let darkMode = false;
@@ -592,6 +592,7 @@
           let handle = document.createElement('div');
           handle.className = className;
           handle.style.borderColor = color;
+          handle.style.backgroundColor = color;
           bbox.append(handle);
           return handle;
         };

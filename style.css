@@ -87,7 +87,7 @@ p {
     height: 11px;
     border-radius: 50%;
     border: 1px solid rgba(255, 0, 0, .5);
-    background-color: rgba(255, 255, 0, .05);
+    background-color: rgba(255, 0, 0, .5);
     position: absolute;
 }
 
@@ -100,27 +100,31 @@ p {
 
 .ui-resizable-n {
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 0);
+    margin: -8px 0;
     cursor: n-resize;
 }
 
 .ui-resizable-s {
     left: 50%;
     bottom: 0%;
-    transform: translate(-50%, 50%);
+    transform: translate(-50%, 0);
+    margin: -8px 0;
     cursor: s-resize;
 }
 
 .ui-resizable-w {
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(0, -50%);
+    margin: 0 -8px;
     cursor: w-resize;
 }
 
 .ui-resizable-e {
     right: 0%;
     top: 50%;
-    transform: translate(50%, -50%);
+    transform: translate(0, -50%);
+    margin: 0 -8px;
     cursor: e-resize;
 }
 
