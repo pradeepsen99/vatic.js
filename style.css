@@ -128,6 +128,38 @@ p {
     cursor: e-resize;
 }
 
+.ui-resizable-ne {
+    top: 0;
+    right: 0;
+    /*transform: translate(-50%, -50%);*/
+    margin: -8px -8px;
+    cursor: ne-resize;
+}
+
+.ui-resizable-nw {
+    top: 0;
+    left: 0;
+    /*transform: translate(-50%, -50%);*/
+    margin: -8px -8px;
+    cursor: nw-resize;
+}
+
+.ui-resizable-sw {
+    bottom: 0;
+    left: 0;
+    /*transform: translate(0, -50%);*/
+    margin: -8px -8px;
+    cursor: sw-resize;
+}
+
+.ui-resizable-se {
+    bottom: 0;
+    right: 0;
+    /*transform: translate(0, -50%)*/;
+    margin: -8px -8px;
+    cursor: se-resize;
+}
+
 .ui-slider {
     position: relative;
     text-align: left;

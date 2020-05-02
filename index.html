@@ -401,7 +401,7 @@
                               }
                           }
                       }
-                      $(annotatedObject.dom).children(':eq(5)').text(annotatedObject.behaviour[0].value);
+                      $(annotatedObject.dom).children(':eq(9)').text(annotatedObject.behaviour[0].value);
                   }
 
                   let shouldHideOthers = frameWithObjects.objects.some(o => o.annotatedObject.hideOthers);
@@ -605,7 +605,11 @@
             n: createHandleDiv('ui-resizable-handle ui-resizable-n', handleColor),
             s: createHandleDiv('ui-resizable-handle ui-resizable-s', handleColor),
             e: createHandleDiv('ui-resizable-handle ui-resizable-e', handleColor),
-            w: createHandleDiv('ui-resizable-handle ui-resizable-w', handleColor)
+            w: createHandleDiv('ui-resizable-handle ui-resizable-w', handleColor),
+            ne: createHandleDiv('ui-resizable-handle ui-resizable-ne', handleColor),
+            nw: createHandleDiv('ui-resizable-handle ui-resizable-nw', handleColor),
+            se: createHandleDiv('ui-resizable-handle ui-resizable-se', handleColor),
+            sw: createHandleDiv('ui-resizable-handle ui-resizable-sw', handleColor)
           },
           stop: (e, ui) => {
             let position = bbox.position();
@@ -689,7 +693,7 @@
 
           addAnnotatedObjectControls(annotatedObject, annotatedObjectsTracker.annotatedObjects.length - 1);
 
-          $(annotatedObject.dom).children(':eq(5)').text(annotatedObject.behaviour[0].value);
+          $(annotatedObject.dom).children(':eq(9)').text(annotatedObject.behaviour[0].value);
 
           doodle.style.cursor = 'default';
         } else {
@@ -723,7 +727,7 @@
       //   });
 
         let id = $('<input type="text" value="ID?" style="margin-bottom: 5px;" />');
-        if (annotatedObject.get()) {
+        if (annotatedObject.id !== null) {
           id.val(annotatedObject.id);
         }
         id.on('change keyup paste mouseup', function() {
@@ -771,6 +775,7 @@
             '<option value="tail biting">tail biting</option>' +
             '<option value="investigating">investigating</option>' +
             '<option value="standing">standing</option>' +
+            '<option value="lying">lying</option>' +
             '<option value="other" selected="selected">other</option>' +
           '</select>'
         );
@@ -787,7 +792,7 @@
           bbox = new BoundingBox(Math.round(position.left), Math.round(position.top), Math.round(jquery.width()), Math.round(jquery.height()));
           frame = new AnnotatedFrame(player.currentFrame, bbox, true, annotatedObject.visible.prop('checked'), this.value);
           annotatedObject.add(frame);
-          jquery.children(':eq(5)').text(this.value);
+          jquery.children(':eq(9)').text(this.value);
         });
         behaviourLabel.append('Behaviour: ');
         behaviourLabel.append(behaviour);
@@ -802,6 +807,9 @@
 
         let del = $('<input type="button" value="Delete" style="margin-bottom: 5px;" />');
         del.click(function() {
+          if (!confirm("Do you really want to delete this annotation?"))
+            return false;
+
           for (let i = 0; annotatedObjectsTracker.annotatedObjects.length; i++) {
             if (annotatedObject === annotatedObjectsTracker.annotatedObjects[i]) {
               clearAnnotatedObject(i);
@@ -958,7 +966,7 @@
           console.log(e);
 
 
-        if ($("#videoFilePath").is(':focus')) {
+        if ($("input").is(':focus')) {
           preventDefault = false;
         }
         else if (e.key === " ") { // space
