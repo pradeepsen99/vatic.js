@@ -46,6 +46,7 @@
             <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>h</strong>" to hide/show all bounding boxes except the active one. [Doesn't affect annotations]</li>
             <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>d</strong>" to enable/disable the dark mode.</li>
             <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>[</strong>" / "<strong>]</strong>" to jump to the previous / the next annotation of the active buonding box.</li>
+            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>,</strong>" / "<strong>.</strong>" to jump to the previous / the next mid point annotation of the active buonding box.</li>
             <li>Zoom in with your browser to place the bounding boxes more accurately.</li>
           </ul>
         <p>Legend:
@@ -1051,9 +1052,8 @@
               player.seek(nextFrame.frameNumber);
           }
         }
-        else if (e.key === "'") { // [
+        else if (e.key === ",") { // [
           let activeAnnotatedObject = findActiveAnnotatedObject().object;
-          // TODO run the following only if the activeAnnotatedObject is annotated in this frame!
           if (config.consoleLog === true)
             console.log(activeAnnotatedObject);
           if (activeAnnotatedObject !== null) {
@@ -1064,14 +1064,13 @@
             if (prevFrame !== null)
             {
               let frame_number = Math.floor((prevFrame.frameNumber + player.currentFrame) / 2);
-              player.seek(frame_number);  // TODO boundaries check?
+              player.seek(frame_number);
             }
 
           }
         }
-        else if (e.key === "#") { // [
+        else if (e.key === ".") { // [
           let activeAnnotatedObject = findActiveAnnotatedObject().object;
-          // TODO run the following only if the activeAnnotatedObject is annotated in this frame!
           if (config.consoleLog === true)
             console.log(activeAnnotatedObject);
           if (activeAnnotatedObject !== null) {
@@ -1082,7 +1081,7 @@
             if (nextFrame !== null)
             {
               let frame_number = Math.floor((nextFrame.frameNumber + player.currentFrame) / 2);
-              player.seek(frame_number);   // TODO boundaries check?
+              player.seek(frame_number);
             }
 
           }
