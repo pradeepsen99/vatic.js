@@ -1051,6 +1051,43 @@
               player.seek(nextFrame.frameNumber);
           }
         }
+        else if (e.key === "'") { // [
+          let activeAnnotatedObject = findActiveAnnotatedObject().object;
+          // TODO run the following only if the activeAnnotatedObject is annotated in this frame!
+          if (config.consoleLog === true)
+            console.log(activeAnnotatedObject);
+          if (activeAnnotatedObject !== null) {
+            let prevFrame = activeAnnotatedObject.getPrev(player.currentFrame);
+            if (config.consoleLog === true) {
+              console.log(prevFrame);
+            }
+            if (prevFrame !== null)
+            {
+              let frame_number = Math.floor((prevFrame.frameNumber + player.currentFrame) / 2);
+              player.seek(frame_number);  // TODO boundaries check?
+            }
+
+          }
+        }
+        else if (e.key === "#") { // [
+          let activeAnnotatedObject = findActiveAnnotatedObject().object;
+          // TODO run the following only if the activeAnnotatedObject is annotated in this frame!
+          if (config.consoleLog === true)
+            console.log(activeAnnotatedObject);
+          if (activeAnnotatedObject !== null) {
+            let nextFrame = activeAnnotatedObject.getNext(player.currentFrame);
+            if (config.consoleLog === true) {
+              console.log(nextFrame);
+            }
+            if (nextFrame !== null)
+            {
+              let frame_number = Math.floor((nextFrame.frameNumber + player.currentFrame) / 2);
+              player.seek(frame_number);   // TODO boundaries check?
+            }
+
+          }
+        }
+
         else {
           preventDefault = false;
         }
