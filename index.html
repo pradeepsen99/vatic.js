@@ -34,21 +34,27 @@
           <li>You already have a first version of your automatic object detector, which you want to improve by manually correcting its errors.</li>
         </ul>
       </li>
-      <li>
+      <p>
         <p>Manually annotate the frame sequence:</p>
         <p>To create a new bounding box, first press "<span style="font-weight: bold;">+</span>" then left click on two locations in the video corresponding to the corners of the box ("Esc" to undo).</p>
         <p>Tips:
           <ul>
-            <li>Use the spacebar to play/pause the video, and the left and right arrows to navigate frame by frame.</li>
             <li>The visibility of each object can be toogled with its visiblity checkbox under the video. [Affects annotations]</li>
-            <li><span style="color: red; font-weight: bold;">NEW</span> Click on a bounding box to activate it. Non-active bounding boxes are now grayish.</li>
-            <li><span style="color: red; font-weight: bold;">NEW</span> The active bounding box is shown on top of the others.</li>
-            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>h</strong>" to hide/show all bounding boxes except the active one. [Doesn't affect annotations]</li>
-            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>d</strong>" to enable/disable the dark mode.</li>
-            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>[</strong>" / "<strong>]</strong>" to jump to the previous / the next annotation of the active buonding box.</li>
-            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>,</strong>" / "<strong>.</strong>" to jump to the previous / the next mid point annotation of the active buonding box.</li>
+            <li>Click on a bounding box to activate it. Non-active bounding boxes are grayish.</li>
+            <li>The active bounding box is shown on top of the others.</li>
             <li>Zoom in with your browser to place the bounding boxes more accurately.</li>
           </ul>
+        </p>
+        <p>Shortcuts:
+          <ul>
+            <li>Use the spacebar to play/pause the video, and the left and right arrows to navigate frame by frame.</li>
+            <li>Press "<strong>h</strong>" to hide/show all bounding boxes except the active one. [Doesn't affect annotations]</li>
+            <li>Press "<strong>d</strong>" to enable/disable the dark mode.</li>
+            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>s</strong>" to annotate the current position and behaviour of the active buonding box (without changing it).</li>
+            <li>Press "<strong>[</strong>" / "<strong>]</strong>" to jump to the previous / the next annotation of the active buonding box.</li>
+            <li><span style="color: red; font-weight: bold;">NEW</span> Press "<strong>,</strong>" / "<strong>.</strong>" to jump to the previous / the next mid point annotation of the active buonding box.</li>
+          </ul>
+        </p>
         <p>Legend:
           <ul>
             <li><div class="bbox bbox-legend active" style=""></div> Inactive bounding box</li>
@@ -1084,6 +1090,20 @@
               player.seek(frame_number);
             }
 
+          }
+        }
+        else if (e.key === "s") { // s
+          let activeAnnotatedObject = findActiveAnnotatedObject().object;
+          if (config.consoleLog === true)
+            console.log(activeAnnotatedObject);
+          if (activeAnnotatedObject !== null) {
+            let bbox;
+            let frame;
+            let jquery = $(activeAnnotatedObject.dom);
+            let position = jquery.position();
+            bbox = new BoundingBox(Math.round(position.left), Math.round(position.top), Math.round(jquery.width()), Math.round(jquery.height()));
+            frame = new AnnotatedFrame(player.currentFrame, bbox, true, activeAnnotatedObject.visible.prop('checked'), activeAnnotatedObject.behaviour[0].value);
+            activeAnnotatedObject.add(frame);
           }
         }
 
