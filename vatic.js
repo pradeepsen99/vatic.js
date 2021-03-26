@@ -49,7 +49,7 @@ function extractFramesFromVideo(video, canvas, config, file) {
 
       resolve({
         width: video.videoWidth,
-        height: video.videoHeight;
+        height: video.videoHeight,
         totalFrames: () => { return Math.ceil(totalSteps); },
         getFrame: (frameNumber) => {
           return new Promise((resolve, _) => {resolve();});
