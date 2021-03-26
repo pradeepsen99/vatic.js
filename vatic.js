@@ -31,8 +31,8 @@ function extractFramesFromVideo(video, canvas, config, file) {
 
     function onload() {
       duration = video.duration;
-      canvas.width = 500;
-      canvas.height = 500;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
       // console.log(video.duration);
 
@@ -48,7 +48,7 @@ function extractFramesFromVideo(video, canvas, config, file) {
       video.playbackRate = config.playbackRate;
 
       resolve({
-        width: video.videoWidth;,
+        width: video.videoWidth,
         height: video.videoHeight;
         totalFrames: () => { return Math.ceil(totalSteps); },
         getFrame: (frameNumber) => {
