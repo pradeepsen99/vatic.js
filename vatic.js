@@ -48,8 +48,8 @@ function extractFramesFromVideo(video, canvas, config, file) {
       video.playbackRate = config.playbackRate;
 
       resolve({
-        width: 500,
-        height: 500,
+        width: video.videoWidth;,
+        height: video.videoHeight;
         totalFrames: () => { return Math.ceil(totalSteps); },
         getFrame: (frameNumber) => {
           return new Promise((resolve, _) => {resolve();});
