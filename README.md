@@ -5,7 +5,7 @@ Project forked from [dbolkensteyn/vatic.js](https://github.com/dbolkensteyn/vati
 This Javascript tool can be used to easily annotate any video in your browser, without having to install anything.  
 It works in Chrome, Firefox, and Safari.
 
-See vatic.js in action at [https://stefanopini.github.io/vatic.js/](https://stefanopini.github.io/vatic.js/)
+See vatic.js in action at [pradeepsen99.github.io/vatic.js/](pradeepsen99.github.io/vatic.js/)
 
 ### Changes
 
