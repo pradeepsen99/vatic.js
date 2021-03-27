@@ -147,12 +147,13 @@
     <script type="text/javascript">
       "use strict";
 
-      var video_size_change = document.getElementById("video")
+      /*var video_size_change = document.getElementById("video")
       video_size_change.height = window.screen.height * .7
 
       var canvas_size_change = document.getElementById("canvas")
       canvas_size_change.height = video_size_change.height
       canvas_size_change.width = video_size_change.width
+      */
 
       function beforeunload(e) {
         return 'Are you sure to exit? Unsaved progress will be lost.';
@@ -860,6 +861,22 @@
         behaviourLabel.append('Behaviour: ');
         behaviourLabel.append(behaviour);
 
+        //TODO ADDING Posture button
+        let postureLabel = $('<label>');
+        let posture = $(
+          '<select style="margin-bottom: 5px;">' +
+            '<option value="upright_standing">Upright standing</option>' +
+            '<option value="upright_sitting">Upright sitting</option>' +
+            '<option value="sternal_laying">Sternal laying</option>' +
+            '<option value="lateral_laying">Lateral laying</option>' +
+            '<option value="huddling">Huddling</option>' +
+            '<option value="transition">Transition</option>' +
+            '<option value="other">Other</option>' +
+          '</select>'
+        );
+        postureLabel.append('Posture: ');
+        postureLabel.append(posture);
+
         // let hideLabel = $('<label>');
         // let hide = $('<input type="checkbox" />');
         // hide.change(function() {
@@ -893,6 +910,8 @@
         div.append(visibleLabel);
         div.append($('<br />'));
         div.append(behaviourLabel);
+        div.append($('<br />'));
+        div.append(postureLabel)
         div.append($('<br />'));
         // div.append(hideLabel);
         // div.append($('<br />'));
