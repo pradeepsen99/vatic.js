@@ -112,22 +112,22 @@
           </div>
           </div>
         </div>
-      </div>
+    </div>
 
 
 
 
-        <div id="doodle">
-          <video id="video" style="position: absolute; z-index: -1;"  ></video>
-          <canvas id="canvas"></canvas>
-        </div>
-        <p style="margin: 0.6em 0 0.4em;">
-          <input type="button" id="play" value="Play" disabled="disabled" /><input type="button" id="pause" value="Pause" disabled="disabled" style="display: none;" />
-          <span class="output" id="currentFrame" style="display: inline-block; margin-left: 7px;"></span>
-        </p>
-        <div id="slider"></div>
-        <p style="display: none;"><label for="speed">Speed multiplier: </label><input type="text" id="speed" value="1.00" size="4" /></p>
-        <div id="objects"></div>
+    <div id="doodle">
+      <video id="video" style="position: absolute; z-index: -1;"  ></video>
+      <canvas id="canvas"></canvas>
+    </div>
+    <p style="margin: 0.6em 0 0.4em;">
+      <input type="button" id="play" value="Play" disabled="disabled" /><input type="button" id="pause" value="Pause" disabled="disabled" style="display: none;" />
+      <span class="output" id="currentFrame" style="display: inline-block; margin-left: 7px;"></span>
+    </p>
+    <div id="slider"></div>
+    <label for="speed">Speed multiplier: </label><input type="text" id="speed" value="1.00" size="4" /></p>
+    <div id="objects"></div>
       </li>
       <li>
         <p><a href="#" download="output.json" id="generateJson"><input type="button" id="generateButton" value="Generate" disabled="disabled" /></a> the JSON annotations file.</p>
@@ -162,8 +162,8 @@
       window.onbeforeunload = beforeunload;
 
       let config = {
-        stepSize: 0.1,
-        playbackRate: 0.4,
+        stepSize: 0.0333,
+        playbackRate: 1,
 
         // Format of the extracted frames
         imageMimeType: 'image/jpeg',
@@ -337,11 +337,17 @@
           }
 
           // let nextFrameNumber = this.currentFrame + 1;
+
+
           let nextFrameNumber = Math.round(video.currentTime / config.stepSize);
           // console.log('\n\n'+nextFrameNumber+'\n\n');
 
+          let speedInput = document.querySelector('#speed').value;
+          console.log(speedInput)
+          video.playbackRate = parseFloat(speedInput)
+
           this.drawFrame(nextFrameNumber).then(() => {
-            // this.currentFrame++;
+            //this.currentFrame++;
             this.currentFrame = nextFrameNumber;
             currentFrameElement.innerHTML = '' + this.currentFrame;
           });
